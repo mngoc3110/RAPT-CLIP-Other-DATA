@@ -14,7 +14,7 @@ python main.py \
   --mode train \
   --exper-name Final_Best_Config_NoMoCo_NoSlerp \
   --gpu 0 \
-  --epochs 30 \
+  --epochs 25 \
   --batch-size 4 \
   --accumulation-steps 4 \
   --optimizer AdamW \
@@ -23,7 +23,7 @@ python main.py \
   --lr-prompt-learner 2e-4 \
   --lr-adapter 1e-4 \
   --weight-decay 0.0005 \
-  --milestones 10 20 30 40 50 \
+  --milestones 10 20 \
   --gamma 0.1 \
   --temporal-layers 1 \
   --num-segments 16 \
