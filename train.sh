@@ -2,28 +2,28 @@
 
 # [LUỒNG 1: KHỞI ĐỘNG]
 # Đây là file bắt đầu (Entry Point).
-# Nó định nghĩa cấu hình "Final Best" với:
-# 1. Attention Pooling (Temporal)
-# 2. Label Distribution Learning (LDL)
-# 3. Decorrelation Loss (DC) & Mutual Information Loss (MI)
-# 4. Adapter Tuning (Parameter Efficient Fine-tuning)
+# Nó định nghĩa cấu hình "Final Best - Safe Mode" (đã được kiểm chứng):
+# - Epochs: 60 (Đủ dài để hội tụ)
+# - Batch Size ảo: 16 (Accumulation 4) - Ổn định
+# - Mixup: 0.2 (Vừa phải)
+# - Regularization: MI/DC 0.1 (Nhẹ nhàng)
 
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
 python main.py \
   --mode train \
-  --exper-name Final_Best_Config_NoMoCo_NoSlerp \
+  --exper-name Train \
   --gpu 0 \
-  --epochs 40 \
+  --epochs 25 \
   --batch-size 4 \
-  --accumulation-steps 8 \
+  --accumulation-steps 4 \
   --optimizer AdamW \
   --lr 2e-5 \
   --lr-image-encoder 1e-6 \
   --lr-prompt-learner 2e-4 \
   --lr-adapter 1e-4 \
   --weight-decay 0.0005 \
-  --milestones 10 20 30 \
+  --milestones 10 20 \
   --gamma 0.1 \
   --temporal-layers 1 \
   --num-segments 16 \
@@ -45,11 +45,11 @@ python main.py \
   --class-token-position end \
   --class-specific-contexts True \
   --load_and_tune_prompt_learner True \
-  --lambda_dc 0.2 \
-  --dc-warmup 3 \
+  --lambda_dc 0.1 \
+  --dc-warmup 5 \
   --dc-ramp 10 \
-  --lambda_mi 0.2 \
-  --mi-warmup 3 \
+  --lambda_mi 0.1 \
+  --mi-warmup 5 \
   --mi-ramp 10 \
   --temperature 0.07 \
   --use-ldl \
@@ -58,4 +58,4 @@ python main.py \
   --use-weighted-sampler \
   --crop-body \
   --grad-clip 1.0 \
-  --mixup-alpha 0.4
+  --mixup-alpha 0.2
