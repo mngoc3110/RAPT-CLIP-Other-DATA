@@ -1,7 +1,7 @@
 from torch import nn
 from models.Temporal_Model import *
 from models.Prompt_Learner import *
-from models.Text import class_descriptor_5_only_face
+from models.Text import class_descriptor_5_only_face, class_descriptor_daisee
 from models.Adapter import Adapter
 from clip import clip
 import itertools
@@ -34,7 +34,11 @@ class GenerateModel(nn.Module):
         self.face_adapter = Adapter(c_in=512, reduction=4)
 
         # For MI Loss
-        hand_crafted_prompts = class_descriptor_5_only_face
+        if args.dataset == 'DAISEE':
+            hand_crafted_prompts = class_descriptor_daisee
+        else:
+            hand_crafted_prompts = class_descriptor_5_only_face
+            
         self.tokenized_hand_crafted_prompts = torch.cat([clip.tokenize(p) for p in hand_crafted_prompts])
         with torch.no_grad():
             embedding = clip_model.token_embedding(self.tokenized_hand_crafted_prompts).type(self.dtype)
