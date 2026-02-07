@@ -7,6 +7,7 @@ from PIL import Image
 import torch
 from torch.utils import data
 import torchvision
+from collections import Counter
 
 # =========================
 # 1) Label mapping (DAiSEE)
@@ -17,6 +18,7 @@ DAISEE_LABEL_MAP = {
     "confusion": 2,
     "frustration": 3
 }
+REVERSE_DAISEE_LABEL_MAP = {v: k for k, v in DAISEE_LABEL_MAP.items()}
 
 # =========================
 # 2) Simple transforms (giống RAER style)
@@ -120,6 +122,14 @@ class DaiseeVideoDataset(data.Dataset):
 
         self.samples = self._read_csv(csv_file)
         print(f"[DAiSEE] Loaded {len(self.samples)} videos from {csv_file}")
+        
+        # Count and print label distribution
+        labels = [s[1] for s in self.samples]
+        counts = Counter(labels)
+        print(f"[DAiSEE] Label distribution for {mode}:")
+        for label_id in sorted(counts.keys()):
+            label_name = REVERSE_DAISEE_LABEL_MAP.get(label_id, str(label_id))
+            print(f"  - {label_name} ({label_id}): {counts[label_id]}")
 
     def _read_csv(self, csv_file):
         items = []
