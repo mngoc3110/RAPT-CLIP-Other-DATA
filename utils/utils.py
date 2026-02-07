@@ -23,15 +23,37 @@ def get_loss_weight(epoch, warmup_epochs, ramp_up_epochs, final_weight):
 def get_class_counts(annotation_file):
     """Reads an annotation file and returns the number of samples for each class."""
     labels = []
-    with open(annotation_file, 'r') as f:
-        for line in f:
-            labels.append(int(line.strip().split()[2]))
+    import csv
+    if annotation_file.endswith('.csv'):
+        with open(annotation_file, 'r', newline='', encoding='utf-8') as f:
+            reader = csv.reader(f)
+            for row in reader:
+                if len(row) < 2: continue
+                label = row[1].strip()
+                if label.isdigit():
+                    labels.append(int(label))
+                else:
+                    # Handle string labels if necessary, though DAISEE loader maps them
+                    # For counts, we just need to know which class it is.
+                    from dataloader.video_dataloader_DAISEE import DAISEE_LABEL_MAP
+                    if label.lower() in DAISEE_LABEL_MAP:
+                        labels.append(DAISEE_LABEL_MAP[label.lower()])
+    else:
+        with open(annotation_file, 'r') as f:
+            for line in f:
+                parts = line.strip().split()
+                if len(parts) >= 3:
+                    labels.append(int(parts[2]))
     
     # Count occurrences of each class
     class_counts = Counter(labels)
     
     # Sort by class index and get just the counts
-    sorted_counts = [class_counts[i] for i in sorted(class_counts)]
+    if not class_counts:
+        return []
+    
+    max_label = max(class_counts.keys())
+    sorted_counts = [class_counts.get(i, 0) for i in range(max_label + 1)]
     
     return sorted_counts
 

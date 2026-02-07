@@ -243,6 +243,21 @@ def train_data_loader(root_dir, list_file, num_segments, duration, image_size,da
             GroupRandomHorizontalFlip(),
             Stack(),
             ToTorchFormatTensor()])
+    elif dataset_name == "DAISEE":
+         train_transforms = torchvision.transforms.Compose([
+            RandomRotation(4),
+            GroupResize(image_size),
+            GroupRandomHorizontalFlip(),
+            Stack(),
+            ToTorchFormatTensor()])
+    else:
+         # Default transform
+         train_transforms = torchvision.transforms.Compose([
+            RandomRotation(4),
+            GroupResize(image_size),
+            GroupRandomHorizontalFlip(),
+            Stack(),
+            ToTorchFormatTensor()])
             
     
     train_data = VideoDataset(root_dir=root_dir, list_file=list_file,

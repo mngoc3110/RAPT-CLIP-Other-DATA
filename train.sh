@@ -1,18 +1,14 @@
 #!/bin/bash
 
 # [LUỒNG 1: KHỞI ĐỘNG]
-# Đây là file bắt đầu (Entry Point).
-# Nó định nghĩa cấu hình "Final Best - Safe Mode" (đã được kiểm chứng):
-# - Epochs: 60 (Đủ dài để hội tụ)
-# - Batch Size ảo: 16 (Accumulation 4) - Ổn định
-# - Mixup: 0.2 (Vừa phải)
-# - Regularization: MI/DC 0.1 (Nhẹ nhàng)
+# Đây là file bắt đầu (Entry Point) được cấu hình cho DAISEE.
 
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
 python main.py \
   --mode train \
-  --exper-name Train \
+  --exper-name Train_DAISEE \
+  --dataset DAISEE \
   --gpu 0 \
   --epochs 25 \
   --batch-size 4 \
@@ -31,13 +27,11 @@ python main.py \
   --image-size 224 \
   --seed 42 \
   --print-freq 10 \
-  --root-dir /kaggle/input/raer-video-emotion-dataset \
-  --train-annotation /kaggle/input/raer-annot/annotation/train_80.txt \
-  --val-annotation /kaggle/input/raer-annot/annotation/val_20.txt \
-  --test-annotation /kaggle/input/raer-annot/annotation/test.txt \
+  --root-dir ./DAISEE/DataSet \
+  --train-annotation ./DAISEE/Labels/TrainLabels.csv \
+  --val-annotation ./DAISEE/Labels/ValidationLabels.csv \
+  --test-annotation ./DAISEE/Labels/TestLabels.csv \
   --clip-path ViT-B/16 \
-  --bounding-box-face /kaggle/input/raer-video-emotion-dataset/RAER/bounding_box/face.json \
-  --bounding-box-body /kaggle/input/raer-video-emotion-dataset/RAER/bounding_box/body.json \
   --text-type prompt_ensemble \
   --temporal-type attn_pool \
   --use-adapter True \
@@ -55,7 +49,5 @@ python main.py \
   --use-ldl \
   --ldl-temperature 1.0 \
   --use-amp \
-  --use-weighted-sampler \
-  --crop-body \
   --grad-clip 1.0 \
   --mixup-alpha 0.2

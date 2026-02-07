@@ -1,6 +1,6 @@
-# RAPT-CLIP: RAER Adapter Prompt Temporal CLIP
+# RAPT-CLIP: Adapter Prompt Temporal CLIP for Video Emotion Recognition
 
-**RAPT-CLIP** is a robust and efficient framework for **Video Emotion Recognition**, specifically designed for the **RAER** dataset. It leverages the power of **CLIP (Contrastive Language-Image Pre-training)** combined with lightweight adaptation techniques to achieve high performance with minimal computational overhead.
+**RAPT-CLIP** is a robust and efficient framework for **Video Emotion Recognition**. Originally designed for the **RAER** dataset, it has been extended to support the **DAISEE** dataset. It leverages the power of **CLIP (Contrastive Language-Image Pre-training)** combined with lightweight adaptation techniques to achieve high performance with minimal computational overhead.
 
 ## 🚀 Key Technologies
 
@@ -16,52 +16,94 @@
 ## 📂 Project Structure
 
 ```
-├── main.py                 # Entry point for Training and Evaluation (Coordinator)
-├── train.sh                # Script to launch Training (Configured with "Safe Mode")
+├── main.py                 # Entry point for Training and Evaluation
+├── train.sh                # Main script to launch Training (Pre-configured)
 ├── valid.sh                # Script to launch Evaluation
 ├── trainer.py              # Training loop, validation, and metric logging
 ├── models/
-│   ├── Generate_Model.py   # Main architecture definition (Forward pass)
-│   ├── Adapter.py          # Lightweight Adapter module
-│   ├── Prompt_Learner.py   # CoOp Prompt Learning module
-│   └── Temporal_Model.py   # Temporal Attention Pooling module
+│   ├── Generate_Model.py   # Main architecture
+│   ├── Adapter.py          # Adapter module
+│   ├── Prompt_Learner.py   # CoOp Prompt Learning
+│   ├── Text.py             # Class definitions (RAER & DAISEE)
+│   └── Temporal_Model.py   # Temporal Attention Pooling
 ├── utils/
-│   ├── builders.py         # Model and DataLoader construction
+│   ├── builders.py         # Model and DataLoader builders
 │   ├── loss.py             # Custom Loss functions (LDL, DC, MI)
-│   └── utils.py            # Helper functions
-└── dataloader/             # Video data loading and preprocessing
+│   └── utils.py            # Utils (Supports .txt and .csv reading)
+└── dataloader/             
+    ├── video_dataloader.py # RAER / Generic Loader
+    └── video_dataloader_DAISEE.py # DAISEE Specific Loader (CSV support)
 ```
+
+## 💾 Supported Datasets
+
+### 1. RAER (Rarely Acted Emotion Recognition)
+*   **Classes (5):** Neutrality, Enjoyment, Confusion, Fatigue, Distraction.
+*   **Format:** Text file annotations (`path/to/video.mp4 num_frames label_id`).
+
+### 2. DAISEE (Dataset for Affective States in E-Environments)
+*   **Classes (4):** Engagement, Boredom, Confusion, Frustration.
+*   **Format:** CSV file annotations (`VideoPath, Label`).
+*   **Data Structure Requirement:**
+    ```text
+    /path/to/DAISEE/
+    ├── DataSet/              # Contains video folders (e.g., Train/, Test/)
+    └── Labels/
+        ├── TrainLabels.csv
+        ├── ValidationLabels.csv
+        └── TestLabels.csv
+    ```
 
 ## 🛠️ Usage
 
 ### 1. Training
-The training configuration is optimized in `train.sh` (Safe Mode: Epochs 60, Accumulation 4, Mixup 0.2).
 
+The project uses `train.sh` as the main configuration file. 
+
+**To Train on DAISEE:**
+Ensure `train.sh` is configured with `--dataset DAISEE` and points to your CSV files.
+
+```bash
+# Example content of train.sh for DAISEE
+python main.py \
+  --mode train \
+  --dataset DAISEE \
+  --root-dir ./DAISEE/DataSet \
+  --train-annotation ./DAISEE/Labels/TrainLabels.csv \
+  ...
+```
+
+Run the script:
 ```bash
 sh train.sh
 ```
 
-**Key Parameters in `train.sh`:**
-*   `--use-adapter`: Enable Adapter for efficient tuning.
-*   `--use-ldl`: Enable Label Distribution Learning.
-*   `--lambda_mi / --lambda_dc`: Regularization strengths (0.1).
-*   `--exper-name`: Name for the output folder (check `outputs/`).
+**To Train on RAER:**
+Change `--dataset RAER` and update annotation paths in `train.sh`.
 
 ### 2. Evaluation
-To evaluate a trained model, update the `--eval-checkpoint` path in `valid.sh` to point to your `model_best.pth`.
+
+To evaluate a trained model, update `valid.sh` with the path to your checkpoint and the correct dataset configuration.
 
 ```bash
 sh valid.sh
 ```
 
+**Key Parameters:**
+*   `--dataset`: `RAER` or `DAISEE`.
+*   `--text-type`: `prompt_ensemble` (Recommended).
+*   `--use-adapter`: `True` (Enable efficient fine-tuning).
+*   `--use-ldl`: `True` (Enable Label Distribution Learning).
+
 ## 📊 Performance Notes
 
-*   **Target UAR:** ~73% (Validation).
-*   **Regularization:** The project uses Mixup, MI Loss, and DC Loss to combat overfitting, which is common in small/medium video datasets like RAER.
+*   **RAER Target UAR:** ~73% (Validation).
+*   **DAISEE:** Optimized with Weighted Sampling (optional) and specialized Prompt Ensembles.
+*   **Regularization:** The project uses Mixup, MI Loss, and DC Loss to combat overfitting.
 
 ## 🧹 Code Cleanliness
 
-This codebase has been rigorously refactored to remove redundant experimental features (MoCo, Slerp, Focal Loss) and focuses purely on the most effective configuration (**Attention Pool + LDL + Adapter**).
+This codebase has been refactored to modularly support multiple datasets via `builders.py` and specialized dataloaders, keeping the core logic clean and extensible.
 
 ## 📝 License
 

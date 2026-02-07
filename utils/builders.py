@@ -7,6 +7,7 @@ import torch.utils.data
 from clip import clip
 
 from dataloader.video_dataloader import train_data_loader, test_data_loader
+from dataloader.video_dataloader_DAISEE import train_data_loader_daisee, test_data_loader_daisee
 from models.Generate_Model import GenerateModel
 from models.Text import *
 from utils.utils import get_class_counts
@@ -70,6 +71,11 @@ def get_class_info(args: argparse.Namespace) -> Tuple[list, list]:
         class_names_with_context = class_names_with_context_5
         class_descriptor = class_descriptor_5
         ensemble_prompts = prompt_ensemble_5
+    elif args.dataset == "DAISEE":
+        class_names = class_names_daisee
+        class_names_with_context = class_names_with_context_daisee
+        class_descriptor = class_descriptor_daisee
+        ensemble_prompts = prompt_ensemble_daisee
     else:
         raise NotImplementedError(f"Dataset '{args.dataset}' is not implemented yet.")
 
@@ -99,39 +105,71 @@ def build_dataloaders(args: argparse.Namespace) -> Tuple[torch.utils.data.DataLo
 
     # [LUỒNG 4.2: DATASETS]
     # Khởi tạo Dataset object (đọc video, transform)
-    print("Loading train data...")
-    train_data = train_data_loader(
-        root_dir=args.root_dir, list_file=train_annotation_file_path, num_segments=args.num_segments,
-        duration=args.duration, image_size=args.image_size,dataset_name=args.dataset,
-        bounding_box_face=args.bounding_box_face,bounding_box_body=args.bounding_box_body,
-        crop_body=args.crop_body,
-        num_classes=num_classes
-    )
-    print(f"Total number of training images: {len(train_data)}")
-    
-    print("Loading validation data...")
-    val_data = test_data_loader(
-        root_dir=args.root_dir, list_file=val_annotation_file_path, num_segments=args.num_segments,
-        duration=args.duration, image_size=args.image_size,
-        bounding_box_face=args.bounding_box_face,bounding_box_body=args.bounding_box_body,
-        crop_body=args.crop_body,
-        num_classes=num_classes
-    )
+    if args.dataset == "DAISEE":
+        print("Loading train data (DAISEE)...")
+        train_data = train_data_loader_daisee(
+            root_dir=args.root_dir,
+            csv_file=train_annotation_file_path,
+            num_segments=args.num_segments,
+            duration=args.duration,
+            image_size=args.image_size,
+            use_face=True # Or pass as arg if available
+        )
+        print(f"Total number of training videos: {len(train_data)}")
+        
+        print("Loading validation data (DAISEE)...")
+        val_data = test_data_loader_daisee(
+            root_dir=args.root_dir,
+            csv_file=val_annotation_file_path,
+            num_segments=args.num_segments,
+            duration=args.duration,
+            image_size=args.image_size,
+            use_face=True
+        )
 
-    print("Loading test data...")
-    test_data = test_data_loader(
-        root_dir=args.root_dir, list_file=test_annotation_file_path, num_segments=args.num_segments,
-        duration=args.duration, image_size=args.image_size,
-        bounding_box_face=args.bounding_box_face,bounding_box_body=args.bounding_box_body,
-        crop_body=args.crop_body,
-        num_classes=num_classes
-    )
+        print("Loading test data (DAISEE)...")
+        test_data = test_data_loader_daisee(
+            root_dir=args.root_dir,
+            csv_file=test_annotation_file_path,
+            num_segments=args.num_segments,
+            duration=args.duration,
+            image_size=args.image_size,
+            use_face=True
+        )
+    else:
+        print("Loading train data...")
+        train_data = train_data_loader(
+            root_dir=args.root_dir, list_file=train_annotation_file_path, num_segments=args.num_segments,
+            duration=args.duration, image_size=args.image_size,dataset_name=args.dataset,
+            bounding_box_face=args.bounding_box_face,bounding_box_body=args.bounding_box_body,
+            crop_body=args.crop_body,
+            num_classes=num_classes
+        )
+        print(f"Total number of training images: {len(train_data)}")
+        
+        print("Loading validation data...")
+        val_data = test_data_loader(
+            root_dir=args.root_dir, list_file=val_annotation_file_path, num_segments=args.num_segments,
+            duration=args.duration, image_size=args.image_size,
+            bounding_box_face=args.bounding_box_face,bounding_box_body=args.bounding_box_body,
+            crop_body=args.crop_body,
+            num_classes=num_classes
+        )
+
+        print("Loading test data...")
+        test_data = test_data_loader(
+            root_dir=args.root_dir, list_file=test_annotation_file_path, num_segments=args.num_segments,
+            duration=args.duration, image_size=args.image_size,
+            bounding_box_face=args.bounding_box_face,bounding_box_body=args.bounding_box_body,
+            crop_body=args.crop_body,
+            num_classes=num_classes
+        )
 
     print("Creating DataLoader instances...")
     
     sampler = None
     shuffle = True
-    if args.use_weighted_sampler:
+    if args.use_weighted_sampler and args.dataset != "DAISEE": # WeightedSampler logic below is for text-file format
         print("=> Using WeightedRandomSampler.")
         class_counts = get_class_counts(train_annotation_file_path)
         class_weights = 1. / torch.tensor(class_counts, dtype=torch.float)

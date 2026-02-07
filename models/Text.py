@@ -67,3 +67,53 @@ prompt_ensemble_5 = [
         "A photo of a student with a wandering gaze and unfocused eyes."
     ]
 ]
+
+# ==========================================
+# DAISEE Definitions (4 classes)
+# 0: Engagement, 1: Boredom, 2: Confusion, 3: Frustration
+# ==========================================
+
+class_names_daisee = [
+    "Engagement",
+    "Boredom",
+    "Confusion",
+    "Frustration"
+]
+
+class_names_with_context_daisee = [
+    "A person is engaged and interested in the content.",
+    "A person looks bored and disinterested.",
+    "A person looks confused and puzzled.",
+    "A person looks frustrated and annoyed."
+]
+
+class_descriptor_daisee = [
+    "A person maintains eye contact, nods slightly, and appears focused and interested in the screen or interaction.",
+    "A person looks away, yawns, supports their head with a hand, or has a blank stare, showing a lack of interest.",
+    "A person frowns, tilts their head, or squints, showing difficulty in understanding or processing information.",
+    "A person furrows their brow, presses lips together, or looks agitated, showing annoyance or dissatisfaction."
+]
+
+# Prompt Ensemble for DAISEE
+prompt_ensemble_daisee = [
+    [   # Engagement
+        "A photo of a person who is engaged.",
+        "A photo of a person showing interest.",
+        "A photo of a person paying attention."
+    ],
+    [   # Boredom
+        "A photo of a person who is bored.",
+        "A photo of a person showing lack of interest.",
+        "A photo of a person looking tired or indifferent."
+    ],
+    [   # Confusion
+        "A photo of a person who is confused.",
+        "A photo of a person looking puzzled.",
+        "A photo of a person trying to understand something."
+    ],
+    [   # Frustration
+        "A photo of a person who is frustrated.",
+        "A photo of a person showing annoyance.",
+        "A photo of a person looking agitated."
+    ]
+]
