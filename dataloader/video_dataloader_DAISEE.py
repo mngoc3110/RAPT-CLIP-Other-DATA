@@ -11,12 +11,13 @@ from collections import Counter
 
 # =========================
 # 1) Label mapping (DAiSEE)
+# Engagement Levels: 0, 1, 2, 3
 # =========================
 DAISEE_LABEL_MAP = {
-    "engagement": 0,
-    "boredom": 1,
-    "confusion": 2,
-    "frustration": 3
+    "very low": 0,
+    "low": 1,
+    "high": 2,
+    "very high": 3
 }
 REVERSE_DAISEE_LABEL_MAP = {v: k for k, v in DAISEE_LABEL_MAP.items()}
 
@@ -90,9 +91,9 @@ class HaarFaceCropper:
 # =========================
 class DaiseeVideoDataset(data.Dataset):
     """
-    CSV format: video_path,label
-      - video_path: đường dẫn tương đối hoặc tuyệt đối đến .mp4
-      - label: 0..3 hoặc string: Engagement/Boredom/Confusion/Frustration
+    CSV format: ClipID,Boredom,Engagement,Confusion,Frustration
+      - ClipID: video path (e.g., 1100011002.avi)
+      - Engagement: Column index 2 (0, 1, 2, 3)
     """
     def __init__(
         self,
@@ -121,38 +122,56 @@ class DaiseeVideoDataset(data.Dataset):
         self.face_cropper = face_cropper if face_cropper is not None else HaarFaceCropper()
 
         self.samples = self._read_csv(csv_file)
-        print(f"[DAiSEE] Loaded {len(self.samples)} videos from {csv_file}")
+        print(f"[DAiSEE] Loaded {len(self.samples)} videos from {csv_file} (Target: Engagement)")
         
         # Count and print label distribution
         labels = [s[1] for s in self.samples]
         counts = Counter(labels)
         print(f"[DAiSEE] Label distribution for {mode}:")
         for label_id in sorted(counts.keys()):
-            label_name = REVERSE_DAISEE_LABEL_MAP.get(label_id, str(label_id))
-            print(f"  - {label_name} ({label_id}): {counts[label_id]}")
+            label_name = REVERSE_DAISEE_LABEL_MAP.get(label_id, f"Level {label_id}")
+            print(f"  - {label_name}: {counts[label_id]}")
 
     def _read_csv(self, csv_file):
         items = []
         with open(csv_file, "r", newline="", encoding="utf-8") as f:
             reader = csv.reader(f)
-            for row in reader:
-                if len(row) < 2:
-                    continue
-                rel_path, label = row[0].strip(), row[1].strip()
-
-                # map label nếu là string
-                if not label.isdigit():
-                    key = label.lower()
-                    if key in DAISEE_LABEL_MAP:
-                        label_id = DAISEE_LABEL_MAP[key]
-                    else:
-                        raise ValueError(f"Unknown label string: {label}")
+            # Check if header exists
+            first_row = next(reader, None)
+            if first_row:
+                 # Simple heuristic: if first col contains "Clip", it's a header
+                if "Clip" in first_row[0]:
+                    pass # Skip header
                 else:
-                    label_id = int(label)
-
-                video_path = os.path.join(self.root_dir, rel_path) if self.root_dir else rel_path
-                items.append((video_path, label_id))
+                    # Process first row if not header
+                     self._process_row(first_row, items)
+            
+            for row in reader:
+                self._process_row(row, items)
         return items
+
+    def _process_row(self, row, items):
+        if len(row) < 3: # Need at least ClipID, Boredom, Engagement
+            return
+        
+        # ClipID is row[0], Engagement is row[2] based on: ClipID,Boredom,Engagement,Confusion,Frustration
+        rel_path = row[0].strip()
+        
+        # Ensure extension (some CSVs might lack it, though DAISEE usually has .avi or .mp4)
+        if not rel_path.lower().endswith(('.avi', '.mp4', '.mov')):
+             rel_path += ".avi" # Default to avi for DAISEE if missing
+             
+        label_str = row[2].strip() # Engagement column
+        
+        if not label_str.isdigit():
+             return # Skip invalid labels
+
+        label_id = int(label_str)
+        
+        # Ensure label is within 0-3
+        if 0 <= label_id <= 3:
+            video_path = os.path.join(self.root_dir, rel_path) if self.root_dir else rel_path
+            items.append((video_path, label_id))
 
     def _get_num_frames(self, cap):
         # OpenCV sometimes fails CAP_PROP_FRAME_COUNT; vẫn dùng tạm

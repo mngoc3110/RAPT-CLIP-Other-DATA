@@ -27,17 +27,29 @@ def get_class_counts(annotation_file):
     if annotation_file.endswith('.csv'):
         with open(annotation_file, 'r', newline='', encoding='utf-8') as f:
             reader = csv.reader(f)
-            for row in reader:
-                if len(row) < 2: continue
-                label = row[1].strip()
+            # Try to skip header if present
+            first_row = next(reader, None)
+            rows = []
+            if first_row:
+                if "Clip" not in first_row[0]: # Not a header
+                    rows.append(first_row)
+                rows.extend(list(reader))
+                
+            for row in rows:
+                if len(row) < 3: continue # Need at least ClipID, Boredom, Engagement...
+                
+                # Check for DAISEE Engagement column (Index 2)
+                # ClipID, Boredom, Engagement, Confusion, Frustration
+                label = row[2].strip() 
+                
                 if label.isdigit():
                     labels.append(int(label))
                 else:
-                    # Handle string labels if necessary, though DAISEE loader maps them
-                    # For counts, we just need to know which class it is.
-                    from dataloader.video_dataloader_DAISEE import DAISEE_LABEL_MAP
-                    if label.lower() in DAISEE_LABEL_MAP:
-                        labels.append(DAISEE_LABEL_MAP[label.lower()])
+                    # Fallback for old format or string labels if needed, but DAISEE usually numeric here
+                    # Try index 1 if index 2 is not it (for compatibility)
+                    if len(row) >= 2 and row[1].strip().isdigit():
+                         labels.append(int(row[1].strip()))
+
     else:
         with open(annotation_file, 'r') as f:
             for line in f:
@@ -53,6 +65,8 @@ def get_class_counts(annotation_file):
         return []
     
     max_label = max(class_counts.keys())
+    # Ensure we cover all classes 0-3 for DAISEE Engagement
+    max_label = max(max_label, 3) 
     sorted_counts = [class_counts.get(i, 0) for i in range(max_label + 1)]
     
     return sorted_counts

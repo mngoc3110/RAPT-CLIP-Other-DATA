@@ -69,51 +69,51 @@ prompt_ensemble_5 = [
 ]
 
 # ==========================================
-# DAISEE Definitions (4 classes)
-# 0: Engagement, 1: Boredom, 2: Confusion, 3: Frustration
+# DAISEE Definitions (4 levels of Engagement)
+# 0: Very Low, 1: Low, 2: High, 3: Very High
 # ==========================================
 
 class_names_daisee = [
-    "Engagement",
-    "Boredom",
-    "Confusion",
-    "Frustration"
+    "Very Low Engagement",
+    "Low Engagement",
+    "High Engagement",
+    "Very High Engagement"
 ]
 
 class_names_with_context_daisee = [
-    "A person is engaged and interested in the content.",
-    "A person looks bored and disinterested.",
-    "A person looks confused and puzzled.",
-    "A person looks frustrated and annoyed."
+    "A person shows very low engagement and is completely completely uninterested.",
+    "A person shows low engagement and seems distracted or bored.",
+    "A person shows high engagement and is paying attention to the content.",
+    "A person shows very high engagement and is deeply focused and interested."
 ]
 
 class_descriptor_daisee = [
-    "A person maintains eye contact, nods slightly, and appears focused and interested in the screen or interaction.",
-    "A person looks away, yawns, supports their head with a hand, or has a blank stare, showing a lack of interest.",
-    "A person frowns, tilts their head, or squints, showing difficulty in understanding or processing information.",
-    "A person furrows their brow, presses lips together, or looks agitated, showing annoyance or dissatisfaction."
+    "A person looks away, eyes closed or wandering, head down or slouching, showing zero interest.",
+    "A person looks partially distracted, yawning or fidgeting, with a blank expression.",
+    "A person maintains eye contact, head upright, looking at the screen with attention.",
+    "A person leans forward, nods, smiles or reacts to the content, showing intense focus and interest."
 ]
 
-# Prompt Ensemble for DAISEE
+# Prompt Ensemble for DAISEE (Engagement Levels)
 prompt_ensemble_daisee = [
-    [   # Engagement
-        "A photo of a person who is engaged.",
-        "A photo of a person showing interest.",
-        "A photo of a person paying attention."
+    [   # Level 0: Very Low
+        "A photo of a person with very low engagement.",
+        "A photo of a person who is completely distracted or sleeping.",
+        "A photo of a person showing no interest at all."
     ],
-    [   # Boredom
-        "A photo of a person who is bored.",
-        "A photo of a person showing lack of interest.",
-        "A photo of a person looking tired or indifferent."
+    [   # Level 1: Low
+        "A photo of a person with low engagement.",
+        "A photo of a person who looks bored or slightly distracted.",
+        "A photo of a person paying little attention."
     ],
-    [   # Confusion
-        "A photo of a person who is confused.",
-        "A photo of a person looking puzzled.",
-        "A photo of a person trying to understand something."
+    [   # Level 2: High
+        "A photo of a person with high engagement.",
+        "A photo of a person paying attention to the screen.",
+        "A photo of a person who is focused on the task."
     ],
-    [   # Frustration
-        "A photo of a person who is frustrated.",
-        "A photo of a person showing annoyance.",
-        "A photo of a person looking agitated."
+    [   # Level 3: Very High
+        "A photo of a person with very high engagement.",
+        "A photo of a person who is highly interested and focused.",
+        "A photo of a person reacting actively to the content."
     ]
 ]
