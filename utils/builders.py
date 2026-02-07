@@ -107,9 +107,10 @@ def build_dataloaders(args: argparse.Namespace) -> Tuple[torch.utils.data.DataLo
     # [LUỒNG 4.2: DATASETS]
     # Khởi tạo Dataset object (đọc video, transform)
     if args.dataset == "DAISEE":
+        import os
         print("Loading train data (DAISEE)...")
         train_data = train_data_loader_daisee(
-            root_dir=args.root_dir,
+            root_dir=os.path.join(args.root_dir, 'Train'),
             csv_file=train_annotation_file_path,
             num_segments=args.num_segments,
             duration=args.duration,
@@ -120,7 +121,7 @@ def build_dataloaders(args: argparse.Namespace) -> Tuple[torch.utils.data.DataLo
         
         print("Loading validation data (DAISEE)...")
         val_data = test_data_loader_daisee(
-            root_dir=args.root_dir,
+            root_dir=os.path.join(args.root_dir, 'Validation'),
             csv_file=val_annotation_file_path,
             num_segments=args.num_segments,
             duration=args.duration,
@@ -130,7 +131,7 @@ def build_dataloaders(args: argparse.Namespace) -> Tuple[torch.utils.data.DataLo
 
         print("Loading test data (DAISEE)...")
         test_data = test_data_loader_daisee(
-            root_dir=args.root_dir,
+            root_dir=os.path.join(args.root_dir, 'Test'),
             csv_file=test_annotation_file_path,
             num_segments=args.num_segments,
             duration=args.duration,

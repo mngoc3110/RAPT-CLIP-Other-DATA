@@ -9,7 +9,7 @@ python main.py \
   --mode train \
   --exper-name Train_DAISEE \
   --dataset DAISEE \
-  --gpu 0 \
+  --gpu mps \
   --epochs 25 \
   --batch-size 4 \
   --accumulation-steps 1 \
@@ -29,8 +29,8 @@ python main.py \
   --print-freq 10 \
   --root-dir ./DAISEE/DataSet \
   --train-annotation ./DAISEE/Labels/TrainLabels_Balanced.csv \
-  --val-annotation ./DAISEE/Labels/ValidationLabels.csv \
-  --test-annotation ./DAISEE/Labels/TestLabels.csv \
+  --val-annotation ./DAISEE/Labels/ValidationLabels_Balanced.csv \
+  --test-annotation ./DAISEE/Labels/TestLabels_Balanced.csv \
   --clip-path ViT-B/16 \
   --text-type prompt_ensemble \
   --temporal-type attn_pool \
