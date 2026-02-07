@@ -2,6 +2,12 @@
 import argparse
 import datetime
 import os
+
+# Suppress OpenCV warnings
+os.environ["OPENCV_LOG_LEVEL"] = "OFF"
+import cv2
+cv2.setLogLevel(0)
+
 import random
 import time
 
