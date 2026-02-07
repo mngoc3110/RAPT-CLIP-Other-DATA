@@ -170,64 +170,20 @@ def build_dataloaders(args: argparse.Namespace) -> Tuple[torch.utils.data.DataLo
     
     sampler = None
     shuffle = True
-    
-    if args.use_weighted_sampler:
+    if args.use_weighted_sampler and args.dataset != "DAISEE": # WeightedSampler logic below is for text-file format
         print("=> Using WeightedRandomSampler.")
         class_counts = get_class_counts(train_annotation_file_path)
-        print(f"=> Class counts for sampling: {class_counts}")
+        class_weights = 1. / torch.tensor(class_counts, dtype=torch.float)
         
-        # Avoid division by zero
-        class_weights = []
-        for c in class_counts:
-            if c > 0:
-                class_weights.append(1.0 / float(c))
-            else:
-                class_weights.append(0.0)
-        
-        class_weights = torch.tensor(class_weights, dtype=torch.float)
-        
+        # Create a weight for each sample
         sample_weights = []
+        with open(train_annotation_file_path, 'r') as f:
+            for line in f:
+                label = int(line.strip().split()[2]) -1 # label is 1-based
+                sample_weights.append(class_weights[label])
         
-        if args.dataset == "DAISEE":
-             with open(train_annotation_file_path, 'r', newline='', encoding='utf-8') as f:
-                reader = csv.reader(f)
-                first_row = next(reader, None)
-                rows = []
-                if first_row:
-                    if "Clip" not in first_row[0]:
-                        rows.append(first_row)
-                    rows.extend(list(reader))
-                    
-                for row in rows:
-                    if len(row) < 3: continue
-                    label_str = row[2].strip()
-                    if label_str.isdigit():
-                        label = int(label_str)
-                        if label < len(class_weights):
-                            sample_weights.append(class_weights[label])
-                        else:
-                            # Fallback if label is out of expected range
-                            sample_weights.append(0)
-                    else:
-                        sample_weights.append(0) # Invalid label
-                        
-        else: # RAER text format
-            with open(train_annotation_file_path, 'r') as f:
-                for line in f:
-                    parts = line.strip().split()
-                    if len(parts) >= 3:
-                        label = int(parts[2]) - 1 # label is 1-based in RAER txt
-                        if 0 <= label < len(class_weights):
-                             sample_weights.append(class_weights[label])
-                        else:
-                             sample_weights.append(0)
-
-        if len(sample_weights) > 0:
-            sampler = torch.utils.data.WeightedRandomSampler(sample_weights, len(sample_weights))
-            shuffle = False # Sampler and shuffle are mutually exclusive
-        else:
-             print("Warning: Could not create sample weights. Falling back to standard shuffling.")
-
+        sampler = torch.utils.data.WeightedRandomSampler(sample_weights, len(sample_weights))
+        shuffle = False # Sampler and shuffle are mutually exclusive
 
     # [LUỒNG 4.3: DATALOADERS]
     # Đóng gói Dataset vào DataLoader để batching

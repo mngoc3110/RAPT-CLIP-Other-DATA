@@ -28,7 +28,7 @@ python main.py \
   --seed 42 \
   --print-freq 10 \
   --root-dir ./DAISEE/DataSet \
-  --train-annotation ./DAISEE/Labels/TrainLabels.csv \
+  --train-annotation ./DAISEE/Labels/TrainLabels_Balanced.csv \
   --val-annotation ./DAISEE/Labels/ValidationLabels.csv \
   --test-annotation ./DAISEE/Labels/TestLabels.csv \
   --clip-path ViT-B/16 \
@@ -50,5 +50,4 @@ python main.py \
   --ldl-temperature 1.0 \
   --use-amp \
   --grad-clip 1.0 \
-  --mixup-alpha 0.2 \
-  --use-weighted-sampler
+  --mixup-alpha 0.2
