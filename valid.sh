@@ -2,15 +2,17 @@
 
 # Script đánh giá cho bộ dữ liệu DAISEE.
 
+export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+
 python main.py \
     --mode eval \
     --dataset DAISEE \
-    --gpu 0 \
+    --gpu mps \
     --exper-name eval_daisee \
-    --eval-checkpoint outputs/Train_DAISEE-[...]/model_best.pth \
+    --eval-checkpoint outputs/Train_DAISEE-[02-07]-[15:36]/model_best.pth \
     --root-dir ./DAISEE/DataSet \
-    --train-annotation ./DAISEE/Labels/TrainLabels.csv \
-    --val-annotation ./DAISEE/Labels/ValidationLabels.csv \
+    --train-annotation ./DAISEE/Labels/TrainLabels_Balanced.csv \
+    --val-annotation ./DAISEE/Labels/ValidationLabels_Balanced.csv \
     --test-annotation ./DAISEE/Labels/TestLabels.csv \
     --clip-path ViT-B/16 \
     --text-type prompt_ensemble \

@@ -95,25 +95,34 @@ class_descriptor_daisee = [
 ]
 
 # Prompt Ensemble for DAISEE (Engagement Levels)
+# UPGRADE: 5 Distinctive Prompts per class (SOTA Plan)
 prompt_ensemble_daisee = [
-    [   # Level 0: Very Low (Disengaged / Sleeping / Away)
-        "A photo of a person who is looking away from the screen.",
-        "A photo of a person with eyes closed or sleeping.",
-        "A photo of a person ignoring the lesson completely."
+    [   # Level 0: Very Low (Total Disengagement)
+        "A photo of a person looking away from the screen completely.",
+        "A photo of a person with eyes closed, sleeping or dozing off.",
+        "A photo of a person with their head down on the desk.",
+        "A photo of a person ignoring the lesson and looking sideways.",
+        "A photo of a person showing zero interest and completely disengaged."
     ],
-    [   # Level 1: Low (Bored / Distracted / Passive)
-        "A photo of a person looking bored and tired.",
-        "A photo of a person yawning or resting their face on their hand.",
-        "A photo of a person looking around the room distractedly."
+    [   # Level 1: Low (Boredom/Fatigue)
+        "A photo of a person yawning or looking extremely tired.",
+        "A photo of a person resting their head on their hand in boredom.",
+        "A photo of a person fidgeting, scratching their face or hair.",
+        "A photo of a person looking around the room distractedly.",
+        "A photo of a person shifting their body posture frequently."
     ],
-    [   # Level 2: High (Attentive / Steady / Neutral-Positive)
-        "A photo of a person looking steadily at the screen.",
-        "A photo of a person paying attention with a calm face.",
-        "A photo of a person sitting upright and watching the content."
+    [   # Level 2: High (Steady Attention)
+        "A photo of a person looking steadily and directly at the screen.",
+        "A photo of a person sitting upright with a calm, neutral face.",
+        "A photo of a person paying attention to the video content.",
+        "A photo of a person maintaining eye contact with the screen.",
+        "A photo of a person showing a normal, focused learning state."
     ],
-    [   # Level 3: Very High (Active / Intense / Interactive)
+    [   # Level 3: Very High (Active Interaction)
         "A photo of a person leaning forward with intense focus.",
-        "A photo of a person smiling or reacting to the video.",
-        "A photo of a person writing notes or talking."
+        "A photo of a person smiling, laughing, or reacting to the video.",
+        "A photo of a person writing notes, talking, or nodding actively.",
+        "A photo of a person showing high energy and excitement.",
+        "A photo of a person who is deeply engrossed in the lecture."
     ]
 ]

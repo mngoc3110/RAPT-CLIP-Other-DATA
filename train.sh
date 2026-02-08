@@ -1,23 +1,28 @@
 #!/bin/bash
 
-# [LUỒNG 1: KHỞI ĐỘNG]
-# Đây là file bắt đầu (Entry Point) được cấu hình cho DAISEE.
+# [SOTA TRAINING CONFIGURATION]
+# Based on Kaggle Best Practices for RAER, adapted for DAiSEE on Mac (MPS)
+# - Batch Size: 8 (Accumulation 2 -> Virtual Batch 16)
+# - MoCoRank: Enabled (K=1024, lambda=0.1)
+# - Fusion: CrossAttention (Auto-enabled in code)
+# - 5 Prompts/Class
 
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
 python main.py \
   --mode train \
-  --exper-name Train_DAISEE \
+  --exper-name Train_DAISEE_SOTA_MoCo \
   --dataset DAISEE \
   --gpu mps \
-  --epochs 25 \
-  --batch-size 4 \
-  --accumulation-steps 1 \
+  --epochs 30 \
+  --batch-size 8 \
+  --accumulation-steps 2 \
+  --workers 4 \
   --optimizer AdamW \
   --lr 2e-5 \
   --lr-image-encoder 1e-6 \
-  --lr-prompt-learner 1e-4 \
-  --lr-adapter 5e-5 \
+  --lr-prompt-learner 2e-4 \
+  --lr-adapter 1e-4 \
   --weight-decay 0.0005 \
   --milestones 10 20 \
   --gamma 0.1 \
@@ -39,15 +44,22 @@ python main.py \
   --class-token-position end \
   --class-specific-contexts True \
   --load_and_tune_prompt_learner True \
-  --lambda_dc 0.05 \
+  --lambda_dc 0.1 \
   --dc-warmup 5 \
-  --dc-ramp 15 \
-  --lambda_mi 0.05 \
+  --dc-ramp 10 \
+  --lambda_mi 0.1 \
   --mi-warmup 5 \
-  --mi-ramp 15 \
+  --mi-ramp 10 \
   --temperature 0.07 \
   --use-ldl \
   --ldl-temperature 1.0 \
   --use-amp \
   --grad-clip 1.0 \
-  --mixup-alpha 0.2
+  --mixup-alpha 0.2 \
+  --use-mocorank \
+  --moco-k 1024 \
+  --moco-m 0.999 \
+  --moco-t 0.07 \
+  --lambda_moco 0.1 \
+  --moco-warmup 5 \
+  --moco-ramp 10

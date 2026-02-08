@@ -99,6 +99,16 @@ loss_group.add_argument('--use-ldl', action='store_true', help='Use Semantic Lab
 loss_group.add_argument('--ldl-temperature', type=float, default=1.0, help='Temperature for LDL target distribution.')
 loss_group.add_argument('--mixup-alpha', type=float, default=0.0, help='Alpha value for Mixup data augmentation. Set to 0.0 to disable.')
 
+# --- MocoRank Configuration ---
+moco_group = parser.add_argument_group('MocoRank Configuration', 'Parameters for Momentum Contrastive Learning')
+moco_group.add_argument('--use-mocorank', action='store_true', help='Enable MoCoRank (Momentum Contrastive) loss.')
+moco_group.add_argument('--moco-k', type=int, default=1024, help='Queue size (K) for MoCo.')
+moco_group.add_argument('--moco-m', type=float, default=0.999, help='Momentum coefficient (m) for MoCo.')
+moco_group.add_argument('--moco-t', type=float, default=0.07, help='Temperature (t) for MoCo.')
+moco_group.add_argument('--lambda_moco', type=float, default=0.1, help='Weight for MoCo loss.')
+moco_group.add_argument('--moco-warmup', type=int, default=5, help='Warmup epochs for MoCo loss.')
+moco_group.add_argument('--moco-ramp', type=int, default=10, help='Ramp-up epochs for MoCo loss.')
+
 # --- Model & Input ---
 model_group = parser.add_argument_group('Model & Input', 'Parameters for model architecture and data handling')
 model_group.add_argument('--text-type', default='class_descriptor', choices=['class_names', 'class_names_with_context', 'class_descriptor', 'prompt_ensemble'], help='Type of text prompts to use.')

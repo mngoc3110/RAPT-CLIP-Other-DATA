@@ -6,6 +6,7 @@ from sklearn.metrics import confusion_matrix
 from tqdm import tqdm
 import os
 import torchvision
+import torch.nn as nn
 
 from utils.utils import AverageMeter, ProgressMeter, get_loss_weight
 from utils.loss import SemanticLDLLoss
@@ -44,25 +45,24 @@ class Trainer:
         # Create directory for saving debug prediction images
         self.debug_predictions_path = 'debug_predictions'
         os.makedirs(self.debug_predictions_path, exist_ok=True)
+        
+        # MoCo Loss
+        self.moco_criterion = nn.CrossEntropyLoss().to(device)
 
     def _save_debug_image(self, tensor, prediction, target, epoch_str, batch_idx, img_idx):
         """Saves a single image tensor for debugging, with prediction and target in the filename."""
         # Un-normalize the image
-        # These are common normalization values for ImageNet, adjust if yours are different
         mean = torch.tensor([0.485, 0.456, 0.406], device=tensor.device).view(3, 1, 1)
         std = torch.tensor([0.229, 0.224, 0.225], device=tensor.device).view(3, 1, 1)
         tensor = tensor * std + mean
         tensor = torch.clamp(tensor, 0, 1)
 
-        # Create a directory for the current epoch if it doesn't exist
         epoch_debug_path = os.path.join(self.debug_predictions_path, f"epoch_{epoch_str}")
         os.makedirs(epoch_debug_path, exist_ok=True)
         
-        # Construct filename
         filename = f"batch_{batch_idx}_img_{img_idx}_pred_{prediction}_true_{target}.png"
         filepath = os.path.join(epoch_debug_path, filename)
         
-        # Save the image
         torchvision.utils.save_image(tensor, filepath)
 
     def mixup_data(self, x1, x2, alpha=1.0):
@@ -91,6 +91,7 @@ class Trainer:
         losses = AverageMeter('Loss', ':.4e')
         mi_losses = AverageMeter('MI Loss', ':.4e')
         dc_losses = AverageMeter('DC Loss', ':.4e')
+        moco_losses = AverageMeter('MoCo Loss', ':.4e')
         war_meter = AverageMeter('WAR', ':6.2f')
         
         progress_meters = [losses, war_meter]
@@ -98,6 +99,8 @@ class Trainer:
             progress_meters.insert(1, mi_losses)
         if self.dc_criterion is not None:
             progress_meters.insert(2, dc_losses)
+        if is_train:
+            progress_meters.insert(3, moco_losses)
 
         progress = ProgressMeter(
             len(loader), 
@@ -110,16 +113,13 @@ class Trainer:
         all_targets = []
         saved_images_count = 0
 
-
         context = torch.enable_grad() if is_train else torch.no_grad()
         
-        # Zero grad at the beginning of the epoch
         if is_train:
-            self.optimizer.zero_grad()
+            self.optimizer.zero_grad(set_to_none=True)
 
         with context:
             for i, (images_face, images_body, target) in enumerate(loader):
-                # Debugging: Print batch information
                 if is_train and i % self.print_freq == 0:
                     print(f"--> Batch {i}, Size: {target.size(0)}, Labels: {target.tolist()}")
 
@@ -133,8 +133,14 @@ class Trainer:
 
                 with torch.cuda.amp.autocast(enabled=self.use_amp):
                     # [LUỒNG 7: FORWARD PASS]
-                    # Chạy model.forward() để lấy output
-                    output, learnable_text_features, hand_crafted_text_features, video_features = self.model(images_face, images_body)
+                    # Upgraded: Now returns moco_logits and moco_labels if available
+                    ret = self.model(images_face, images_body)
+                    
+                    if len(ret) == 6:
+                        output, learnable_text_features, hand_crafted_text_features, video_features, moco_logits, moco_labels = ret
+                    else:
+                        output, learnable_text_features, hand_crafted_text_features, video_features = ret
+                        moco_logits, moco_labels = None, None
                     
                     # For MI and DC losses
                     processed_learnable_text_features = learnable_text_features
@@ -159,21 +165,31 @@ class Trainer:
                     loss = classification_loss
 
                     # [LUỒNG 8.2: LOSS CALCULATION - AUXILIARY]
-                    if is_train and self.mi_criterion is not None:
-                        mi_weight = get_loss_weight(int(epoch_str), self.mi_warmup, self.mi_ramp, self.lambda_mi)
-                        mi_loss = self.mi_criterion(processed_learnable_text_features, hand_crafted_text_features)
-                        loss += mi_weight * mi_loss
-                        mi_losses.update(mi_loss.item(), target.size(0))
+                    if is_train:
+                        # MI Loss
+                        if self.mi_criterion is not None:
+                            mi_weight = get_loss_weight(int(epoch_str), self.mi_warmup, self.mi_ramp, self.lambda_mi)
+                            mi_loss = self.mi_criterion(processed_learnable_text_features, hand_crafted_text_features)
+                            loss += mi_weight * mi_loss
+                            mi_losses.update(mi_loss.item(), target.size(0))
 
-                    if is_train and self.dc_criterion is not None:
-                        dc_weight = get_loss_weight(int(epoch_str), self.dc_warmup, self.dc_ramp, self.lambda_dc)
-                        dc_loss = self.dc_criterion(processed_learnable_text_features)
-                        loss += dc_weight * dc_loss
-                        dc_losses.update(dc_loss.item(), target.size(0))
+                        # DC Loss
+                        if self.dc_criterion is not None:
+                            dc_weight = get_loss_weight(int(epoch_str), self.dc_warmup, self.dc_ramp, self.lambda_dc)
+                            dc_loss = self.dc_criterion(processed_learnable_text_features)
+                            loss += dc_weight * dc_loss
+                            dc_losses.update(dc_loss.item(), target.size(0))
+                            
+                        # [UPGRADE] MoCo Loss
+                        if moco_logits is not None and moco_labels is not None:
+                            # Use same warmup/ramp as MI for simplicity
+                            moco_weight = 0.1 * get_loss_weight(int(epoch_str), 5, 10, 1.0) 
+                            moco_loss_val = self.moco_criterion(moco_logits, moco_labels)
+                            loss += moco_weight * moco_loss_val
+                            moco_losses.update(moco_loss_val.item(), target.size(0))
                         
                 if is_train:
                     # [LUỒNG 9: BACKWARD PASS]
-                    # Optimize weights
                     loss = loss / self.accumulation_steps
                     
                     if self.use_amp:
@@ -193,9 +209,8 @@ class Trainer:
                                 torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.grad_clip)
                             self.optimizer.step()
                         
-                        self.optimizer.zero_grad()
+                        self.optimizer.zero_grad(set_to_none=True)
 
-                # Record metrics
                 loss_val = loss.item() * self.accumulation_steps if is_train else loss.item()
                 losses.update(loss_val, target.size(0))
                 
@@ -225,7 +240,6 @@ class Trainer:
                 if i % self.print_freq == 0:
                     progress.display(i)
         
-        # Calculate epoch-level metrics
         all_preds = torch.cat(all_preds)
         all_targets = torch.cat(all_targets)
         
