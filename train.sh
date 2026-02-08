@@ -16,8 +16,8 @@ python main.py \
   --optimizer AdamW \
   --lr 2e-5 \
   --lr-image-encoder 1e-6 \
-  --lr-prompt-learner 2e-4 \
-  --lr-adapter 1e-4 \
+  --lr-prompt-learner 1e-4 \
+  --lr-adapter 5e-5 \
   --weight-decay 0.0005 \
   --milestones 10 20 \
   --gamma 0.1 \
@@ -39,12 +39,12 @@ python main.py \
   --class-token-position end \
   --class-specific-contexts True \
   --load_and_tune_prompt_learner True \
-  --lambda_dc 0.1 \
+  --lambda_dc 0.05 \
   --dc-warmup 5 \
-  --dc-ramp 10 \
-  --lambda_mi 0.1 \
+  --dc-ramp 15 \
+  --lambda_mi 0.05 \
   --mi-warmup 5 \
-  --mi-ramp 10 \
+  --mi-ramp 15 \
   --temperature 0.07 \
   --use-ldl \
   --ldl-temperature 1.0 \

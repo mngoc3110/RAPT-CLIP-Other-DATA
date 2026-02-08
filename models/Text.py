@@ -81,39 +81,39 @@ class_names_daisee = [
 ]
 
 class_names_with_context_daisee = [
-    "A person shows very low engagement and is completely completely uninterested.",
-    "A person shows low engagement and seems distracted or bored.",
-    "A person shows high engagement and is paying attention to the content.",
-    "A person shows very high engagement and is deeply focused and interested."
+    "A person shows very low engagement and is completely uninterested or asleep.",
+    "A person shows low engagement and seems bored, tired or distracted.",
+    "A person shows high engagement and is calmly paying attention to the screen.",
+    "A person shows very high engagement and is actively reacting and focused."
 ]
 
 class_descriptor_daisee = [
-    "A person looks away, eyes closed or wandering, head down or slouching, showing zero interest.",
-    "A person looks partially distracted, yawning or fidgeting, with a blank expression.",
-    "A person maintains eye contact, head upright, looking at the screen with attention.",
-    "A person leans forward, nods, smiles or reacts to the content, showing intense focus and interest."
+    "A person is looking away, has eyes closed, head down, or is completely ignoring the screen.",
+    "A person is yawning, scratching face, looking around, or resting head on hand, showing boredom.",
+    "A person is sitting upright, looking directly at the screen, with a neutral but attentive face.",
+    "A person is leaning forward, smiling, talking, or taking notes, showing intense interest."
 ]
 
 # Prompt Ensemble for DAISEE (Engagement Levels)
 prompt_ensemble_daisee = [
-    [   # Level 0: Very Low
-        "A photo of a person with very low engagement.",
-        "A photo of a person who is completely distracted or sleeping.",
-        "A photo of a person showing no interest at all."
+    [   # Level 0: Very Low (Disengaged / Sleeping / Away)
+        "A photo of a person who is looking away from the screen.",
+        "A photo of a person with eyes closed or sleeping.",
+        "A photo of a person ignoring the lesson completely."
     ],
-    [   # Level 1: Low
-        "A photo of a person with low engagement.",
-        "A photo of a person who looks bored or slightly distracted.",
-        "A photo of a person paying little attention."
+    [   # Level 1: Low (Bored / Distracted / Passive)
+        "A photo of a person looking bored and tired.",
+        "A photo of a person yawning or resting their face on their hand.",
+        "A photo of a person looking around the room distractedly."
     ],
-    [   # Level 2: High
-        "A photo of a person with high engagement.",
-        "A photo of a person paying attention to the screen.",
-        "A photo of a person who is focused on the task."
+    [   # Level 2: High (Attentive / Steady / Neutral-Positive)
+        "A photo of a person looking steadily at the screen.",
+        "A photo of a person paying attention with a calm face.",
+        "A photo of a person sitting upright and watching the content."
     ],
-    [   # Level 3: Very High
-        "A photo of a person with very high engagement.",
-        "A photo of a person who is highly interested and focused.",
-        "A photo of a person reacting actively to the content."
+    [   # Level 3: Very High (Active / Intense / Interactive)
+        "A photo of a person leaning forward with intense focus.",
+        "A photo of a person smiling or reacting to the video.",
+        "A photo of a person writing notes or talking."
     ]
 ]
