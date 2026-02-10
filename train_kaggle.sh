@@ -74,10 +74,10 @@ python main.py \
   --class-specific-contexts True \
   --load_and_tune_prompt_learner True \
   --lambda_dc 0.1 \
-  --dc-warmup 5 \
+  --dc-warmup 4 \
   --dc-ramp 10 \
   --lambda_mi 0.1 \
-  --mi-warmup 5 \
+  --mi-warmup 4 \
   --mi-ramp 10 \
   --temperature 0.07 \
   --use-ldl \

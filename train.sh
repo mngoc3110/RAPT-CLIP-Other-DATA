@@ -56,3 +56,4 @@ python main.py \
   --use-amp \
   --grad-clip 1.0 \
   --mixup-alpha 0.2 \
+  --use-weighted-sampler

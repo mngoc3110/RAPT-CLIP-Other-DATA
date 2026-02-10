@@ -55,6 +55,9 @@ class SemanticLDLLoss(nn.Module):
         target: (B) - Ground truth indices
         text_features: (C, D) - Embeddings of class prompts
         """
+        # Normalize text_features to ensure cosine similarity
+        text_features = F.normalize(text_features, p=2, dim=-1)
+
         # 1. Compute Semantic Similarity between classes based on Text Features
         # text_features is (C, D), normalized
         # sim_matrix: (C, C)
