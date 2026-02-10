@@ -171,20 +171,34 @@ def build_dataloaders(args: argparse.Namespace) -> Tuple[torch.utils.data.DataLo
     
     sampler = None
     shuffle = True
-    if args.use_weighted_sampler and args.dataset != "DAISEE": # WeightedSampler logic below is for text-file format
+    if args.use_weighted_sampler:
         print("=> Using WeightedRandomSampler.")
-        class_counts = get_class_counts(train_annotation_file_path)
-        class_weights = 1. / torch.tensor(class_counts, dtype=torch.float)
-        
-        # Create a weight for each sample
-        sample_weights = []
-        with open(train_annotation_file_path, 'r') as f:
-            for line in f:
-                label = int(line.strip().split()[2]) -1 # label is 1-based
-                sample_weights.append(class_weights[label])
-        
-        sampler = torch.utils.data.WeightedRandomSampler(sample_weights, len(sample_weights))
-        shuffle = False # Sampler and shuffle are mutually exclusive
+        if args.dataset == "DAISEE":
+            # For DAISEE (CSV format)
+            # 1. Get sample labels
+            sample_labels = [s[1] for s in train_data.samples]
+            # 2. Calculate class frequencies
+            from collections import Counter
+            counts = Counter(sample_labels)
+            class_counts = [counts.get(i, 1) for i in range(num_classes)] # Use 1 as default to avoid div by zero
+            # 3. Calculate weights
+            class_weights = 1. / torch.tensor(class_counts, dtype=torch.float)
+            sample_weights = [class_weights[label] for label in sample_labels]
+            sampler = torch.utils.data.WeightedRandomSampler(sample_weights, len(sample_weights))
+            shuffle = False
+        elif args.dataset == "RAER":
+            # Original RAER logic (Text format)
+            class_counts = get_class_counts(train_annotation_file_path)
+            class_weights = 1. / torch.tensor(class_counts, dtype=torch.float)
+            
+            sample_weights = []
+            with open(train_annotation_file_path, 'r') as f:
+                for line in f:
+                    label = int(line.strip().split()[2]) - 1 # RAER labels are 1-based in text file
+                    sample_weights.append(class_weights[label])
+            
+            sampler = torch.utils.data.WeightedRandomSampler(sample_weights, len(sample_weights))
+            shuffle = False
 
     # [LUỒNG 4.3: DATALOADERS]
     # Đóng gói Dataset vào DataLoader để batching

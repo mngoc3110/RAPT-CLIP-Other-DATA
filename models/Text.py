@@ -95,34 +95,34 @@ class_descriptor_daisee = [
 ]
 
 # Prompt Ensemble for DAISEE (Engagement Levels)
-# UPGRADE: 5 Distinctive Prompts per class (SOTA Plan)
+# REFINED FOR WEBCAM CONTEXT & DISTINGUISHABILITY
 prompt_ensemble_daisee = [
-    [   # Level 0: Very Low (Total Disengagement)
-        "A photo of a person looking away from the screen completely.",
-        "A photo of a person with eyes closed, sleeping or dozing off.",
-        "A photo of a person with their head down on the desk.",
-        "A photo of a person ignoring the lesson and looking sideways.",
-        "A photo of a person showing zero interest and completely disengaged."
+    [   # Level 0: Very Low (Avoidance / Sleep)
+        "A webcam view of a person looking completely away from the computer screen.",
+        "A close-up of a person with eyes closed, sleeping, or head down on the desk.",
+        "A photo of a person talking to someone else in the room, ignoring the computer.",
+        "A webcam shot of a person leaving the chair or turning their back to the camera.",
+        "A face of a person showing zero interest, completely disengaged from online learning."
     ],
-    [   # Level 1: Low (Boredom/Fatigue)
-        "A photo of a person yawning or looking extremely tired.",
-        "A photo of a person resting their head on their hand in boredom.",
-        "A photo of a person fidgeting, scratching their face or hair.",
-        "A photo of a person looking around the room distractedly.",
-        "A photo of a person shifting their body posture frequently."
+    [   # Level 1: Low (Passive Distraction / Boredom)
+        "A webcam view of a person looking bored, yawning, or rubbing their eyes.",
+        "A photo of a person resting their chin on their hand, looking tired and blank.",
+        "A person fidgeting, scratching their head, or looking around the room distractedly.",
+        "A face showing signs of fatigue, drooping eyelids, and lack of energy.",
+        "A student checking their phone or multitasking instead of focusing on the screen."
     ],
-    [   # Level 2: High (Steady Attention)
-        "A photo of a person looking steadily and directly at the screen.",
-        "A photo of a person sitting upright with a calm, neutral face.",
-        "A photo of a person paying attention to the video content.",
-        "A photo of a person maintaining eye contact with the screen.",
-        "A photo of a person showing a normal, focused learning state."
+    [   # Level 2: High (Steady / Passive Focus)
+        "A webcam view of a person looking directly and steadily at the computer screen.",
+        "A photo of a person sitting upright with a neutral, calm, and attentive face.",
+        "A face of a student quietly watching the online lecture without much movement.",
+        "A person maintaining consistent eye contact with the monitor, showing normal focus.",
+        "A student listening to the lesson with a serious and composed expression."
     ],
-    [   # Level 3: Very High (Active Interaction)
-        "A photo of a person leaning forward with intense focus.",
-        "A photo of a person smiling, laughing, or reacting to the video.",
-        "A photo of a person writing notes, talking, or nodding actively.",
-        "A photo of a person showing high energy and excitement.",
-        "A photo of a person who is deeply engrossed in the lecture."
+    [   # Level 3: Very High (Active / Intense Focus)
+        "A webcam view of a person leaning forward towards the screen with intense focus.",
+        "A photo of a student nodding, smiling, or mouthing words in response to the lesson.",
+        "A face showing excitement, surprise, or deep cognitive engagement with the content.",
+        "A person taking notes vigorously or looking very sharp and alert.",
+        "A student showing high energy and strong positive reaction to the online class."
     ]
 ]
