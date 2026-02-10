@@ -38,37 +38,44 @@ def balance_csv(input_path, output_path, max_samples_per_majority_class):
     print("Original distribution:")
     print(df[target_column].value_counts().sort_index())
 
-    # Separate by class
-    dfs = {}
-    for i in range(4):
-        # Handle missing classes gracefully
-        if i in unique_labels:
-            dfs[i] = df[df[target_column] == i]
-        else:
-            dfs[i] = pd.DataFrame(columns=df.columns)
+    # --- LOGIC BRANCH ---
+    # If max_samples_per_majority_class is 0 or None, WE KEEP ORIGINAL DISTRIBUTION
+    # (Just shuffle and save)
+    if not max_samples_per_majority_class or max_samples_per_majority_class <= 0:
+        print(">> Mode: KEEP ORIGINAL (No balancing/downsampling applied).")
+        final_df = df.sample(frac=1, random_state=random_seed).reset_index(drop=True)
+    else:
+        print(f">> Mode: BALANCING (Max {max_samples_per_majority_class} samples per class).")
+        # Separate by class
+        dfs = {}
+        for i in range(4):
+            # Handle missing classes gracefully
+            if i in unique_labels:
+                dfs[i] = df[df[target_column] == i]
+            else:
+                dfs[i] = pd.DataFrame(columns=df.columns)
 
-    # Downsample majority classes
-    frames = []
-    for i in range(4):
-        subset = dfs[i]
-        if len(subset) > max_samples_per_majority_class:
-            subset = subset.sample(n=max_samples_per_majority_class, random_state=random_seed)
-        frames.append(subset)
+        # Downsample majority classes
+        frames = []
+        for i in range(4):
+            subset = dfs[i]
+            if len(subset) > max_samples_per_majority_class:
+                subset = subset.sample(n=max_samples_per_majority_class, random_state=random_seed)
+            frames.append(subset)
 
-    # Combine
-    balanced_df = pd.concat(frames)
-    
-    # Shuffle
-    balanced_df = balanced_df.sample(frac=1, random_state=random_seed).reset_index(drop=True)
+        # Combine
+        final_df = pd.concat(frames)
+        # Shuffle
+        final_df = final_df.sample(frac=1, random_state=random_seed).reset_index(drop=True)
 
-    print("Balanced distribution:")
-    print(balanced_df[target_column].value_counts().sort_index())
+    print("Final Output distribution:")
+    print(final_df[target_column].value_counts().sort_index())
 
     # Ensure output directory exists
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     
     print(f"Saving to {output_path}...")
-    balanced_df.to_csv(output_path, index=False)
+    final_df.to_csv(output_path, index=False)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Balance DAiSEE Dataset Labels")
@@ -87,8 +94,8 @@ if __name__ == "__main__":
     # Train set: Keep aggressive balancing (600) to force learning minority classes
     balance_csv(args.train_in, args.train_out, 600)
     
-    # Validation/Test: Downsample significantly to monitor UAR correctly
-    balance_csv(args.val_in, args.val_out, 150)
-    balance_csv(args.test_in, args.test_out, 150)
+    # Validation/Test: PASS 0 to KEEP ORIGINAL DISTRIBUTION (Standard Benchmark Practice)
+    balance_csv(args.val_in, args.val_out, 0)
+    balance_csv(args.test_in, args.test_out, 0)
     
     print("\nAll balancing tasks completed.")
