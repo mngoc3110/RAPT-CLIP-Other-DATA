@@ -43,7 +43,7 @@ python main.py \
   --dataset DAISEE \
   --gpu 0 \
   --epochs 20 \
-  --batch-size 16 \
+  --batch-size 4 \
   --accumulation-steps 1 \
   --workers 4 \
   --optimizer AdamW \
