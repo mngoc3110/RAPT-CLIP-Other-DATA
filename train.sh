@@ -11,12 +11,12 @@ export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
 python main.py \
   --mode train \
-  --exper-name Train_DAISEE_SOTA_MoCo \
+  --exper-name Train_DAISEE_SOTA \
   --dataset DAISEE \
-  --gpu mps \
-  --epochs 30 \
-  --batch-size 8 \
-  --accumulation-steps 2 \
+  --gpu 0 \
+  --epochs 20 \
+  --batch-size 4 \
+  --accumulation-steps 1 \
   --workers 4 \
   --optimizer AdamW \
   --lr 2e-5 \
@@ -56,10 +56,3 @@ python main.py \
   --use-amp \
   --grad-clip 1.0 \
   --mixup-alpha 0.2 \
-  --use-mocorank \
-  --moco-k 1024 \
-  --moco-m 0.999 \
-  --moco-t 0.07 \
-  --lambda_moco 0.1 \
-  --moco-warmup 5 \
-  --moco-ramp 10
