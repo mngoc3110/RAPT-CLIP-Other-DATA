@@ -44,6 +44,7 @@ python main.py \
   --gpu 0 \
   --epochs 20 \
   --batch-size 4 \
+  --resume /kaggle/input/resume-rapt-clip-daisee/model.pth \
   --accumulation-steps 1 \
   --workers 4 \
   --optimizer AdamW \
